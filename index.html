@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payslip Generator - Universal Tribes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f4f4f9;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Universal Tribes - Payslip Generator</h2>
+
+    <label for="employeeId">Employee ID</label>
+    <input type="text" id="employeeId" placeholder="Enter employee ID" />
+
+    <label for="employeeName">Employee Name</label>
+    <input type="text" id="employeeName" placeholder="Enter employee name" />
+
+    <label for="month">Month</label>
+    <input type="text" id="month" placeholder="Enter month (e.g., June 2025)" />
+
+    <label for="receivedAmount">In-hand / Received Amount</label>
+    <input type="number" id="receivedAmount" placeholder="Enter received amount" oninput="autoCalculate()" />
+
+    <label for="basicPay">Basic Pay</label>
+    <input type="number" id="basicPay" placeholder="Auto calculated" readonly />
+
+    <label for="hra">HRA</label>
+    <input type="number" id="hra" placeholder="Auto calculated" readonly />
+
+    <label for="other">Other Allowances</label>
+    <input type="number" id="other" placeholder="Auto calculated" readonly />
+
+    <label for="deductions">Deductions</label>
+    <input type="number" id="deductions" placeholder="Enter deductions" oninput="autoCalculate()" />
+
+    <button onclick="generatePDF()">Generate Payslip PDF</button>
+  </div>
+
+  <script>
+    function autoCalculate() {
+      const received = parseFloat(document.getElementById("receivedAmount").value || 0);
+      const deductions = parseFloat(document.getElementById("deductions").value || 0);
+      const gross = received + deductions;
+
+      const basic = gross * 0.5;
+      const hra = gross * 0.3;
+      const other = gross - basic - hra;
+
+      document.getElementById("basicPay").value = basic.toFixed(2);
+      document.getElementById("hra").value = hra.toFixed(2);
+      document.getElementById("other").value = other.toFixed(2);
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const id = document.getElementById("employeeId").value;
+      const name = document.getElementById("employeeName").value;
+      const month = document.getElementById("month").value;
+      const basicPay = parseFloat(document.getElementById("basicPay").value || 0);
+      const hra = parseFloat(document.getElementById("hra").value || 0);
+      const other = parseFloat(document.getElementById("other").value || 0);
+      const deductions = parseFloat(document.getElementById("deductions").value || 0);
+      const gross = basicPay + hra + other;
+      const net = gross - deductions;
+
+      doc.setFontSize(18);
+      doc.text("Universal Tribes - Payslip", 20, 20);
+      doc.setFontSize(12);
+      doc.text(`Employee ID: ${id}`, 20, 40);
+      doc.text(`Employee Name: ${name}`, 20, 50);
+      doc.text(`Month: ${month}`, 20, 60);
+      doc.text(`Basic Pay: ₹${basicPay.toFixed(2)}`, 20, 70);
+      doc.text(`HRA: ₹${hra.toFixed(2)}`, 20, 80);
+      doc.text(`Other Allowances: ₹${other.toFixed(2)}`, 20, 90);
+      doc.text(`Gross Salary: ₹${gross.toFixed(2)}`, 20, 100);
+      doc.text(`Deductions: ₹${deductions.toFixed(2)}`, 20, 110);
+      doc.text(`Net Salary: ₹${net.toFixed(2)}`, 20, 120);
+      doc.text("This is a system-generated payslip.", 20, 140);
+
+      doc.save(`${name.replace(/\s+/g, '_')}_${month}_Payslip.pdf`);
+    }
+  </script>
+</body>
+</html>
