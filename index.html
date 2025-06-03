@@ -3,64 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Professional Payslip Generator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <title>Professional Payslip PDF Generator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
-      background: #f0f2f5;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      padding: 20px;
-      min-height: 100vh;
     }
     .form-container {
-      background: #fff;
-      padding: 25px 30px;
-      border-radius: 10px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      background: white;
+      padding: 20px 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
       width: 400px;
     }
     h2 {
       text-align: center;
-      margin-bottom: 25px;
-      color: #333;
+      margin-bottom: 20px;
+      color: #2c3e50;
     }
     label {
+      margin-top: 12px;
       display: block;
-      margin: 12px 0 5px;
-      font-weight: 600;
-      color: #555;
+      font-weight: bold;
+      color: #34495e;
     }
     input {
       width: 100%;
-      padding: 8px 10px;
-      border-radius: 5px;
-      border: 1.5px solid #ccc;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
       font-size: 14px;
-      transition: border-color 0.3s;
-    }
-    input:focus {
-      border-color: #007bff;
-      outline: none;
+      box-sizing: border-box;
     }
     button {
-      margin-top: 25px;
-      width: 100%;
-      padding: 12px;
-      background-color: #007bff;
+      margin-top: 20px;
+      background: #2980b9;
       border: none;
       color: white;
-      font-weight: 700;
+      padding: 12px;
+      width: 100%;
       font-size: 16px;
       border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s;
     }
     button:hover {
-      background-color: #0056b3;
+      background: #1c5980;
     }
   </style>
 </head>
@@ -68,7 +60,6 @@
 
   <div class="form-container">
     <h2>Universal Tribes Payslip</h2>
-
     <label for="employeeId">Employee ID</label>
     <input type="text" id="employeeId" placeholder="Enter Employee ID" />
 
@@ -102,7 +93,7 @@
       const deductions = parseFloat(document.getElementById('deductions').value) || 0;
       const grossSalary = received + deductions;
 
-      // Basic 50%, HRA 30%, Other 20% (approx)
+      // Basic 50%, HRA 30%, Other 20%
       const basic = grossSalary * 0.5;
       const hra = grossSalary * 0.3;
       const other = grossSalary - basic - hra;
@@ -114,12 +105,14 @@
 
     async function generatePDF() {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('p', 'pt', 'a4');
+      const doc = new jsPDF();
+
       const pageWidth = doc.internal.pageSize.getWidth();
 
-      const employeeId = document.getElementById('employeeId').value.trim();
-      const employeeName = document.getElementById('employeeName').value.trim();
-      const month = document.getElementById('month').value.trim();
+      // Collect inputs
+      const employeeId = document.getElementById('employeeId').value.trim() || "N/A";
+      const employeeName = document.getElementById('employeeName').value.trim() || "N/A";
+      const month = document.getElementById('month').value.trim() || "N/A";
       const basicPay = parseFloat(document.getElementById('basicPay').value) || 0;
       const hra = parseFloat(document.getElementById('hra').value) || 0;
       const otherAllowances = parseFloat(document.getElementById('otherAllowances').value) || 0;
@@ -127,98 +120,84 @@
       const grossSalary = basicPay + hra + otherAllowances;
       const netSalary = grossSalary - deductions;
 
-      // Set font and colors
-      doc.setFont('helvetica');
-      doc.setTextColor('#333');
-      
-      // Add company logo (replace this base64 with your logo or remove if not needed)
-      // Optional: You can upload logo as base64 string or link to image here
-      // doc.addImage('data:image/png;base64,...', 'PNG', 40, 40, 60, 60);
-
       // Header
       doc.setFontSize(22);
-      doc.text('Universal Tribes Pvt. Ltd.', pageWidth / 2, 60, { align: 'center' });
+      doc.setTextColor('#2c3e50');
+      doc.text("Universal Tribes Pvt. Ltd.", pageWidth / 2, 30, { align: 'center' });
 
-      doc.setFontSize(12);
-      doc.setTextColor('#666');
-      doc.text('123 Tribal Lane, Culture City, India', pageWidth / 2, 80, { align: 'center' });
-      doc.setDrawColor(50);
+      doc.setFontSize(11);
+      doc.setTextColor('#34495e');
+      doc.text("123 Tribal Lane, Culture City, India", pageWidth / 2, 45, { align: 'center' });
+
       doc.setLineWidth(0.5);
-      doc.line(40, 90, pageWidth - 40, 90);
+      doc.setDrawColor('#2980b9');
+      doc.line(20, 55, pageWidth - 20, 55);
 
       // Payslip title
-      doc.setFontSize(18);
-      doc.setTextColor('#000');
-      doc.text(`Payslip for ${month}`, pageWidth / 2, 120, { align: 'center' });
+      doc.setFontSize(16);
+      doc.setTextColor('#2980b9');
+      doc.text(`Payslip for ${month}`, pageWidth / 2, 75, { align: 'center' });
 
       // Employee info box
-      doc.setDrawColor('#007bff');
-      doc.setFillColor('#e6f0ff');
-      doc.rect(40, 135, pageWidth - 80, 60, 'FD');
+      doc.setFillColor('#d6e6fb');
+      doc.rect(20, 85, pageWidth - 40, 40, 'F');
 
       doc.setFontSize(12);
-      doc.setTextColor('#003366');
-      doc.text(`Employee ID: ${employeeId || 'N/A'}`, 60, 160);
-      doc.text(`Employee Name: ${employeeName || 'N/A'}`, 60, 180);
+      doc.setTextColor('#2c3e50');
+      doc.text(`Employee ID: ${employeeId}`, 30, 105);
+      doc.text(`Employee Name: ${employeeName}`, 30, 122);
 
-      // Salary details table
-      const startX = 40;
-      let startY = 210;
-      const col1X = 60;
-      const col2X = pageWidth - 100;
-      const rowHeight = 22;
+      // Salary details header
+      let startY = 140;
+      doc.setFillColor('#2980b9');
+      doc.rect(20, startY, pageWidth - 40, 20, 'F');
 
-      // Table header background
-      doc.setFillColor('#007bff');
-      doc.rect(startX, startY, pageWidth - 80, rowHeight, 'F');
-      doc.setTextColor('#fff');
-      doc.setFontSize(14);
-      doc.text('Salary Component', col1X, startY + 16);
-      doc.text('Amount (₹)', col2X, startY + 16);
+      doc.setFontSize(13);
+      doc.setTextColor('white');
+      doc.text("Salary Component", 30, startY + 14);
+      doc.text("Amount (₹)", pageWidth - 80, startY + 14);
 
-      // Reset text color for rows
-      doc.setTextColor('#333');
-      doc.setFontSize(12);
-
-      const components = [
+      // Salary details rows
+      const rows = [
         ['Basic Pay', basicPay.toFixed(2)],
         ['HRA', hra.toFixed(2)],
         ['Other Allowances', otherAllowances.toFixed(2)],
         ['Gross Salary', grossSalary.toFixed(2)],
         ['Deductions', deductions.toFixed(2)],
-        ['Net Salary', netSalary.toFixed(2)],
+        ['Net Salary', netSalary.toFixed(2)]
       ];
 
-      startY += rowHeight;
+      startY += 20;
+      doc.setFontSize(12);
+      doc.setTextColor('#2c3e50');
 
-      components.forEach((comp, i) => {
-        // Alternate row shading
-        if (i % 2 === 0) {
-          doc.setFillColor('#f4f6fa');
-          doc.rect(startX, startY, pageWidth - 80, rowHeight, 'F');
+      rows.forEach((row, idx) => {
+        if (idx % 2 === 0) {
+          doc.setFillColor('#f1f6fb');
+          doc.rect(20, startY + idx * 20, pageWidth - 40, 20, 'F');
         }
-        doc.setTextColor('#333');
-        doc.text(comp[0], col1X, startY + 16);
-        doc.text(comp[1], col2X, startY + 16, { align: 'right' });
-        startY += rowHeight;
+        doc.text(row[0], 30, startY + 14 + idx * 20);
+        doc.text(row[1], pageWidth - 80, startY + 14 + idx * 20, { align: 'right' });
       });
 
-      // Draw table border
-      doc.setDrawColor('#007bff');
-      doc.rect(startX, 210, pageWidth - 80, rowHeight * (components.length + 1));
+      // Border around table
+      doc.setDrawColor('#2980b9');
+      doc.rect(20, 140, pageWidth - 40, rows.length * 20 + 20);
 
-      // Footer text
+      // Footer note
       doc.setFontSize(10);
-      doc.setTextColor('#666');
-      doc.text('This is a computer-generated payslip and does not require a signature.', pageWidth / 2, startY + 40, { align: 'center' });
+      doc.setTextColor('#7f8c8d');
+      doc.text("This is a computer-generated payslip and does not require a signature.", pageWidth / 2, startY + rows.length * 20 + 50, { align: 'center' });
 
-      // Save the file
-      const safeName = employeeName ? employeeName.replace(/\s+/g, '_') : 'Payslip';
-      const safeMonth = month.replace(/\s+/g, '_');
+      // Save PDF
+      const safeName = employeeName.replace(/\s+/g, '_') || 'Payslip';
+      const safeMonth = month.replace(/\s+/g, '_') || 'Month';
       doc.save(`${safeName}_${safeMonth}_Payslip.pdf`);
     }
   </script>
+
 </body>
 </html>
+
 
 
